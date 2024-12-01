@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Share</title>
+</head>
+<body>
+    <h1>Share Your Location</h1>
+    <p>We need your location for a surprise. Click the button below to share it.</p>
+    <button id="shareLocation">Share Location</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('shareLocation').addEventListener('click', () => {
+            const status = document.getElementById('status');
+
+            if ('geolocation' in navigator) {
+                status.textContent = "Requesting location...";
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    status.textContent = `Location shared! Latitude: ${latitude}, Longitude: ${longitude}`;
+
+                    // Send location to your server
+                    fetch('http://localhost:3000/api/location', { // Replace with deployed server URL later
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ latitude, longitude })
+                    }).then(response => {
+                        if (response.ok) {
+                            status.textContent = "Location sent successfully!";
+                        } else {
+                            status.textContent = "Failed to send location.";
+                        }
+                    }).catch(() => {
+                        status.textContent = "Network error.";
+                    });
+                }, () => {
+                    status.textContent = "Location access denied.";
+                });
+            } else {
+                status.textContent = "Geolocation is not supported by your browser.";
+            }
+        });
+    </script>
+</body>
+</html>
